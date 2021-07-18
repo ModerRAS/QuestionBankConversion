@@ -2,7 +2,7 @@
   "name": "85e6349c55ab461082e2c315db53c8b6",
   "pluginName": "题库转换",
   "description": "多种格式的题库转换",
-  "version": "v1.0.0",
+  "version": "v1.0.1",
   "preload": "./preload.js",
   "author": "ModerRAS",
   "homepage": "https://github.com/mohuishou/utools",

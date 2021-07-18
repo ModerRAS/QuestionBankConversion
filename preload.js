@@ -158,11 +158,19 @@ const MTBWriter = (AnswerList, title) => {
     const topicType = element.topicType;
     const answer = element.answer;
     const correctAnswer = element.correctAnswer;
+    const pattern = RegExp(/对|正确|错|错误/);
     if (topic != "") {
-      let output = [topic, topicType, ...answer];
-      output[8] = correctAnswer;
-      output[10] = "1";
-      return output;
+      if (answer[0].match(pattern)) {
+        let output = [topic, topicType];
+        output[8] = correctAnswer;
+        output[10] = "1";
+        return output;
+      } else {
+        let output = [topic, topicType, ...answer];
+        output[8] = correctAnswer;
+        output[10] = "1";
+        return output;
+      }
     }
   });
 
@@ -170,7 +178,7 @@ const MTBWriter = (AnswerList, title) => {
 
   let out_worksheet = xlsx.utils.aoa_to_sheet([...Header, ...toSheet]);
 
-  out_worksheet["!merges"] = merge
+  out_worksheet["!merges"] = merge;
 
   let workBook = utils.book_new();
 
