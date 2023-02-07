@@ -36,8 +36,8 @@ const GetExtension = (path) => {
     console.log(length);
   
     let toSheet = [];
-  
-    for (let index = 3; index < length; index++) {
+
+    for (let index = 3; index < length + 1; index++) {
       try {
         let topicData = {};
         topicData.topic = worksheet[`G${index}`].v.trim().trim('"');
@@ -75,7 +75,7 @@ const GetExtension = (path) => {
   
     let toSheet = [];
   
-    for (let index = 2; index < length; index++) {
+    for (let index = 2; index < length + 1; index++) {
       try {
         let topicData = {};
         topicData.topic = worksheet[`B${index}`].v.trim().trim('"');
