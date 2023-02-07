@@ -16,7 +16,7 @@
             "type": "files",
             "label": "转换题库",
             "fileType": "file",
-            "match": "/(xls|xlsx)/"
+            "match": "/(xls|xlsx|txt)/"
         }
     ]
     }

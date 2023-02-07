@@ -39,6 +39,16 @@ const DetectionQuestionType = (fileStringList) => {
     return QuestionList
 }
 
+const DetectionHasAnswer = (QuestionList) => {
+    let correctAnswerReg = new RegExp("^答案")
+    let patternIndexList = GetPatternIndex(QuestionList, correctAnswerReg)
+    if (patternIndexList.length > 0 && patternIndexList[0]) {
+        return true
+    } else {
+        return false
+    }
+}
+
 const DetectionSelectQuestion = (QuestionList) => {
     let correctAnswerReg = new RegExp("^答案")
     let patternIndexList = GetPatternIndex(QuestionList, correctAnswerReg)
@@ -59,7 +69,7 @@ const DetectionSelectQuestion = (QuestionList) => {
 }
 
 const RecognizeSelectionQuestion = (topicType) => (SplitQuestionList) => {
-    let Selection = new RegExp("[AaBbCcDdEeFfGgHhIi][、.]")
+    let Selection = new RegExp("[AaBbCcDdEeFfGgHhIi][、.．]")
     let correctAnswerReg = new RegExp("[AaBbCcDdEeFfGgHhIi]+")
     let correctAnswer = SplitQuestionList[SplitQuestionList.length - 1].match(correctAnswerReg)[0]
     let toRec = SplitQuestionList.slice(0, -1).join(" ").split(Selection)
@@ -71,9 +81,26 @@ const RecognizeSelectionQuestion = (topicType) => (SplitQuestionList) => {
     return Question
 }
 
-const DetectionJudgeQuestion = (QuestionList) => {
+const RecognizeJudgeQuestion = (SplitQuestionList) => {
     let correctAnswerReg = new RegExp("([(（)](对|正确|)[)）]|[(（)](错|错误|)[)）])")
-    QuestionList
+    if (!correctAnswerReg.test(SplitQuestionList)) {
+        return
+    }
+    let correctAnswer = SplitQuestionList.match(correctAnswerReg)[0]
+    let Question = {}
+    Question.topic = SplitQuestionList.replace(correctAnswerReg, "").trim()
+    Question.topicType = "判断题"
+    Question.answer = []
+    Question.correctAnswer = correctAnswer.match(/错/g)?.length > 0 ? "B" : "A"
+    return Question
+}
+
+const ConvertJudgeQuestion = (QuestionList) => {
+    if (DetectionHasAnswer(QuestionList)) {
+        return QuestionList.map(s => RecognizeSelectionQuestion("判断题")(s))
+    } else {
+        return QuestionList.map(s => RecognizeJudgeQuestion(s))
+    }
 }
 
 const TxtReader = (filePath) => {
@@ -83,5 +110,11 @@ const TxtReader = (filePath) => {
     const QuestionList = DetectionQuestionType(fileStringList)
     const SingleSelectQuestion = DetectionSelectQuestion(QuestionList.single).map(s => RecognizeSelectionQuestion("单选题")(s))
     const MultiSelectQuestion = DetectionSelectQuestion(QuestionList.multi).map(s => RecognizeSelectionQuestion("多选题")(s))
-    return fileStringList
+    const JudgeQuestion = ConvertJudgeQuestion(QuestionList.judge)
+
+    return [...SingleSelectQuestion, ...MultiSelectQuestion, ...JudgeQuestion].filter(x => x)
+}
+
+module.exports = {
+    TxtReader
 }

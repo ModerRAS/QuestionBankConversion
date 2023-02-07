@@ -1,6 +1,7 @@
 const { writeFile } = require("fs");
 
-const {GetExtension, WLDXReader, WLDX4Reader, MTBWriter, KSBWriter} = require("./lib")
+const {GetName, WLDXReader, WLDX4Reader, MTBWriter, KSBWriter} = require("./lib")
+const {TxtReader} = require("./TxtReader")
 
 const TotalList = [
   {
@@ -23,10 +24,30 @@ const TotalList = [
     description: "4列版网络大学转磨题帮",
     keyword: "wldxmtb_short_4",
   },
+  {
+    title: "TXT题库=>磨题帮",
+    description: "TXT题库转磨题帮",
+    keyword: "txtmtb",
+  },
+  {
+    title: "TXT题库=>考试宝",
+    description: "TXT题库转考试宝",
+    keyword: "txtksb",
+  },
 ];
 
+const Converter = (Reader, Writer, FromPath, ToPath) => {
+  writeFile(
+    ToPath,
+    Writer(Reader(FromPath), GetName(ToPath)),
+    () => {
+      window.utools.hideMainWindow();
+      window.utools.outPlugin();
+    })
+}
 
-const select = (action, itemData, callbackSetList) => {
+
+const Selector = (action, itemData, callbackSetList) => {
   let path = utools.showSaveDialog({
     title: "保存位置",
     defaultPath: utools.getPath("downloads"),
@@ -43,58 +64,28 @@ const select = (action, itemData, callbackSetList) => {
     ],
   });
 
-  if (path) {
-    switch (itemData.keyword) {
-      case "wldxmtb":
-        writeFile(
-          path,
-          MTBWriter(WLDXReader(action.payload[0].path), GetName(path)),
-          () => {
-            window.utools.hideMainWindow();
-            window.utools.outPlugin();
-          }
-        );
-        break;
-      case "wldxksb":
-        writeFile(
-          path,
-          KSBWriter(
-            WLDXReader(action.payload[0].path),
-            GetExtension(path)
-          ),
-          () => {
-            window.utools.hideMainWindow();
-            window.utools.outPlugin();
-          }
-        );
-        break;
-      case "wldxksb_short_4":
-        writeFile(
-          path,
-          KSBWriter(
-            WLDX4Reader(action.payload[0].path),
-            GetExtension(path)
-          ),
-          () => {
-            window.utools.hideMainWindow();
-            window.utools.outPlugin();
-          }
-        );
-        break;
-        case "wldxmtb_short_4":
-          writeFile(
-            path,
-            MTBWriter(
-              WLDX4Reader(action.payload[0].path),
-              GetExtension(path)
-            ),
-            () => {
-              window.utools.hideMainWindow();
-              window.utools.outPlugin();
-            }
-          );
-          break;
-    }
+  if (!path) {
+    return
+  }
+  switch (itemData.keyword) {
+    case "wldxmtb":
+      Converter(WLDXReader, MTBWriter, action.payload[0].path, path)
+      break;
+    case "wldxksb":
+      Converter(WLDXReader, KSBWriter, action.payload[0].path, path)
+      break;
+    case "wldxksb_short_4":
+      Converter(WLDX4Reader, KSBWriter, action.payload[0].path, path)
+      break;
+    case "wldxmtb_short_4":
+      Converter(WLDX4Reader, MTBWriter, action.payload[0].path, path)
+      break;
+    case "txtmtb":
+      Converter(TxtReader, MTBWriter, action.payload[0].path, path)
+      break;
+    case "txtksb":
+      Converter(TxtReader, KSBWriter, action.payload[0].path, path)
+      break;
   }
 }
 
@@ -109,7 +100,7 @@ window.exports = {
         callbackSetList(TotalList);
       },
       // 用户选择列表中某个条目时被调用
-      select: select,
+      select: Selector,
       // 子输入框为空时的占位符，默认为字符串"搜索"
       placeholder: "",
     },
