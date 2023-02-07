@@ -97,7 +97,7 @@ const RecognizeJudgeQuestion = (SplitQuestionList) => {
 
 const ConvertJudgeQuestion = (QuestionList) => {
     if (DetectionHasAnswer(QuestionList)) {
-        return QuestionList.map(s => RecognizeSelectionQuestion("判断题")(s))
+        return DetectionSelectQuestion(QuestionList).map(s => RecognizeSelectionQuestion("判断题")(s))
     } else {
         return QuestionList.map(s => RecognizeJudgeQuestion(s))
     }
