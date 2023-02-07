@@ -15,10 +15,6 @@ const GetExtension = (path) => {
     return pathTmp.join(".");
   };
   
-  const WordReader = (filePath) => {
-  
-  }
-  
   const WLDXReader = (filePath) => {
     // 获取数据
     let data = [];
@@ -216,4 +212,4 @@ const GetExtension = (path) => {
   };
 
 
-module.exports = {GetExtension, WLDXReader, WLDX4Reader, MTBWriter, KSBWriter}
+module.exports = {GetExtension, WLDXReader, WLDX4Reader, MTBWriter, KSBWriter, GetName}
