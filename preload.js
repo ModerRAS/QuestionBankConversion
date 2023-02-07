@@ -14,6 +14,16 @@ const TotalList = [
     description: "网络大学转考试宝",
     keyword: "wldxksb",
   },
+  {
+    title: "4列版网络大学=>考试宝",
+    description: "4列版网络大学转考试宝",
+    keyword: "wldxksb_short_4",
+  },
+  {
+    title: "4列版网络大学=>磨题帮",
+    description: "4列版网络大学转磨题帮",
+    keyword: "wldxmtb_short_4",
+  },
 ];
 
 const GetExtension = (path) => {
@@ -57,6 +67,44 @@ const WLDXReader = (filePath) => {
         .replace(/；/g, ";")
         .split("$;$");
       topicData.correctAnswer = worksheet[`I${index}`].v.trim().trim('"');
+      toSheet.push(topicData);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  return toSheet;
+};
+
+const WLDX4Reader = (filePath) => {
+  // 获取数据
+  let data = [];
+  const excelBuffer = fs.readFileSync(filePath);
+
+  // 解析数据
+  const workbook = xlsx.read(excelBuffer, {
+    type: "buffer",
+    cellHTML: false,
+  });
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
+  const length = parseInt(worksheet["!ref"].split(":")[1].match(/[0-9]+/));
+
+  console.log(length);
+
+  let toSheet = [];
+
+  for (let index = 2; index < length; index++) {
+    try {
+      let topicData = {};
+      topicData.topic = worksheet[`B${index}`].v.trim().trim('"');
+      topicData.topicType = worksheet[`A${index}`].v.trim().trim('"');
+      topicData.answer = worksheet[`C${index}`].v
+        .trim()
+        .trim('"')
+        .replace(/；/g, ";")
+        .split("$;$");
+      topicData.correctAnswer = worksheet[`D${index}`].v.trim().trim('"');
       toSheet.push(topicData);
     } catch (e) {
       console.log(e);
@@ -246,6 +294,32 @@ window.exports = {
                 }
               );
               break;
+            case "wldxksb_short_4":
+              writeFile(
+                path,
+                KSBWriter(
+                  WLDX4Reader(action.payload[0].path),
+                  GetExtension(path)
+                ),
+                () => {
+                  window.utools.hideMainWindow();
+                  window.utools.outPlugin();
+                }
+              );
+              break;
+              case "wldxmtb_short_4":
+                writeFile(
+                  path,
+                  MTBWriter(
+                    WLDX4Reader(action.payload[0].path),
+                    GetExtension(path)
+                  ),
+                  () => {
+                    window.utools.hideMainWindow();
+                    window.utools.outPlugin();
+                  }
+                );
+                break;
           }
         }
       },
