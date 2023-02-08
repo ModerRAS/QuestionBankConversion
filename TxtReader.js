@@ -1,6 +1,7 @@
 const { writeFile } = require("fs"),
   fs = require("fs"),
   iconv = require("iconv-lite")
+const jschardet = require("jschardet")
 
 const GetPatternIndex = (stringList, pattern) => {
     var split_list = new Array();
@@ -105,7 +106,8 @@ const ConvertJudgeQuestion = (QuestionList) => {
 
 const TxtReader = (filePath) => {
     const buffer = fs.readFileSync(filePath)
-    const data = iconv.decode(buffer, "gbk")
+    let charset = jschardet.detect(buffer).encoding
+    const data = iconv.decode(buffer, charset)
     const fileStringList = data.split("\r\n")
     const QuestionList = DetectionQuestionType(fileStringList)
     const SingleSelectQuestion = DetectionSelectQuestion(QuestionList.single).map(s => RecognizeSelectionQuestion("单选题")(s))
