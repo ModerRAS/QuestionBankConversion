@@ -1,7 +1,14 @@
 const { writeFile } = require("fs");
 
-const {GetName, WLDXReader, WLDX4Reader, MTBWriter, KSBWriter} = require("./lib")
-const {TxtReader} = require("./TxtReader")
+const {
+  GetName,
+  WLDXReader,
+  WLDX4Reader,
+  MTBWriter,
+  KSBWriter,
+  EXCReader,
+} = require("./lib");
+const { TxtReader } = require("./TxtReader");
 
 const TotalList = [
   {
@@ -34,18 +41,24 @@ const TotalList = [
     description: "TXT题库转考试宝",
     keyword: "txtksb",
   },
+  {
+    title: "E现场=>磨题帮",
+    description: "E现场转磨题帮",
+    keyword: "excmtb",
+  },
+  {
+    title: "E现场=>考试宝",
+    description: "E现场转考试宝",
+    keyword: "excksb",
+  },
 ];
 
 const Converter = (Reader, Writer, FromPath, ToPath) => {
-  writeFile(
-    ToPath,
-    Writer(Reader(FromPath), GetName(ToPath)),
-    () => {
-      window.utools.hideMainWindow();
-      window.utools.outPlugin();
-    })
-}
-
+  writeFile(ToPath, Writer(Reader(FromPath), GetName(ToPath)), () => {
+    window.utools.hideMainWindow();
+    window.utools.outPlugin();
+  });
+};
 
 const Selector = (action, itemData, callbackSetList) => {
   let path = utools.showSaveDialog({
@@ -65,29 +78,35 @@ const Selector = (action, itemData, callbackSetList) => {
   });
 
   if (!path) {
-    return
+    return;
   }
   switch (itemData.keyword) {
     case "wldxmtb":
-      Converter(WLDXReader, MTBWriter, action.payload[0].path, path)
+      Converter(WLDXReader, MTBWriter, action.payload[0].path, path);
       break;
     case "wldxksb":
-      Converter(WLDXReader, KSBWriter, action.payload[0].path, path)
+      Converter(WLDXReader, KSBWriter, action.payload[0].path, path);
       break;
     case "wldxksb_short_4":
-      Converter(WLDX4Reader, KSBWriter, action.payload[0].path, path)
+      Converter(WLDX4Reader, KSBWriter, action.payload[0].path, path);
       break;
     case "wldxmtb_short_4":
-      Converter(WLDX4Reader, MTBWriter, action.payload[0].path, path)
+      Converter(WLDX4Reader, MTBWriter, action.payload[0].path, path);
       break;
     case "txtmtb":
-      Converter(TxtReader, MTBWriter, action.payload[0].path, path)
+      Converter(TxtReader, MTBWriter, action.payload[0].path, path);
       break;
     case "txtksb":
-      Converter(TxtReader, KSBWriter, action.payload[0].path, path)
+      Converter(TxtReader, KSBWriter, action.payload[0].path, path);
+      break;
+    case "excmtb":
+      Converter(EXCReader, MTBWriter, action.payload[0].path, path);
+      break;
+    case "excksb":
+      Converter(EXCReader, KSBWriter, action.payload[0].path, path);
       break;
   }
-}
+};
 
 window.exports = {
   convert: {

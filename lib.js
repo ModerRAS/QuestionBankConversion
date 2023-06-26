@@ -14,7 +14,51 @@ const GetExtension = (path) => {
     pathTmp.pop();
     return pathTmp.join(".");
   };
+
+  const EXCReader = (filePath) => {
+    // 获取数据
+    let data = [];
+    const excelBuffer = fs.readFileSync(filePath);
   
+    // 解析数据
+    const workbook = xlsx.read(excelBuffer, {
+      type: "buffer",
+      cellHTML: false,
+    });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+  
+    const length = parseInt(worksheet["!ref"].split(":")[1].match(/[0-9]+/));
+
+    console.log(length);
+
+    let toSheet = [];
+
+    for (let index = 3; index < length + 1; index++) {
+      try {
+        let topicData = {};
+        topicData.topic = worksheet[`F${index}`].v.trim().trim('"');
+        topicData.topicType = worksheet[`E${index}`].v.trim().trim('"');
+        topicData.answer = worksheet[`G${index}`]?.v
+          .trim()
+          .trim('"')
+          .replace(/；/g, ";")
+          .replace(/A-/g, "")
+          .replace(/B-/g, "")
+          .replace(/C-/g, "")
+          .replace(/D-/g, "")
+          .replace(/E-/g, "")
+          .replace(/F-/g, "")
+          .replace(/G-/g, "")
+          .split("|") ?? [];
+        topicData.correctAnswer = worksheet[`H${index}`].v.trim().trim('"');
+        toSheet.push(topicData);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  
+    return toSheet;
+  };
   const WLDXReader = (filePath) => {
     // 获取数据
     let data = [];
@@ -91,7 +135,7 @@ const GetExtension = (path) => {
     return toSheet;
   };
   
-  const KSBWriter = (AnswerList, extension) => {
+  const KSBWriter = (AnswerList, title) => {
     console.log(AnswerList);
     const toSheet = AnswerList.map((element) => {
       const topic = element.topic;
@@ -145,7 +189,7 @@ const GetExtension = (path) => {
     utils.book_append_sheet(workBook, out_worksheet, "Sheet1");
   
     const result = xlsx.write(workBook, {
-      bookType: extension, // 输出的文件类型
+      bookType: "xlsx", // 输出的文件类型
       type: "buffer", // 输出的数据类型
       compression: true, // 开启zip压缩
     });
@@ -212,4 +256,4 @@ const GetExtension = (path) => {
   };
 
 
-module.exports = {GetExtension, WLDXReader, WLDX4Reader, MTBWriter, KSBWriter, GetName}
+module.exports = {GetExtension, EXCReader, WLDXReader, WLDX4Reader, MTBWriter, KSBWriter, GetName}
